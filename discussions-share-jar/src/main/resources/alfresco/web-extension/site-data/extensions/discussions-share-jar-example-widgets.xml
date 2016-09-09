@@ -1,20 +1,15 @@
 <extension>
-  <modules>
-    <module>
-      <id>discussions-share-jar - Example Aikau Widgets</id>
-      <version>1.0</version>
-      <auto-deploy>true</auto-deploy>
-      <configurations>
-        <config evaluator="string-compare" condition="WebFramework" replace="false">
-          <web-framework>
-            <dojo-pages>
-              <packages>
-                <package name="tutorials" location="resources/discussions-share-jar/js/tutorials"/>
-              </packages>
-            </dojo-pages>
-          </web-framework>
-        </config>
-      </configurations>
-    </module>
-  </modules>
+	<modules>
+		<module>
+			<id>discussions-share-jar - Discussions Notifications</id>
+			<version>1.0</version>
+			<auto-deploy>true</auto-deploy>
+			<customizations>
+				<customization>
+					<targetPackageRoot>org.alfresco.modules</targetPackageRoot>
+					<sourcePackageRoot>net.malariagen.modules</sourcePackageRoot>
+				</customization>
+			</customizations>
+		</module>
+	</modules>
 </extension>
