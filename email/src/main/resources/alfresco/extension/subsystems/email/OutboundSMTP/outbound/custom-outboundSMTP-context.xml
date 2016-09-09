@@ -7,10 +7,8 @@
    <!-- MAIL SERVICE           -->
    <!--                        -->
     <import resource="classpath:alfresco/subsystems/email/OutboundSMTP/mail-template-services-context.xml"/>
-   
- 
-   
-   <bean id="mail" class="net.malariagen.alfresco.action.CustomMailAction" parent="action-executer">
+    
+   <bean id="custom-mail" class="net.malariagen.alfresco.action.CustomMailAction" parent="action-executer">
         <property name="queueName" value="outboundMail"/>
         <property name="mailService">
             <ref bean="mailService"></ref>
@@ -74,6 +72,15 @@
         <!-- For dev/test only - if true, emails are not actually sent -->
         <property name="testMode" value="${dev.email.not.sent}"/>
         
+        <!-- Addition that seems to be needed... -->
+        <property name="applicableTypes">
+            <list>
+                <value>{http://www.alfresco.org/model/content/1.0}content</value>
+            </list>
+        </property>
+        
 	</bean>
+   
+
  
 </beans>

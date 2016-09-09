@@ -31,6 +31,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import javax.mail.Address;
 import javax.mail.MessagingException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
@@ -39,7 +40,6 @@ import org.alfresco.error.AlfrescoRuntimeException;
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.action.ParameterDefinitionImpl;
 import org.alfresco.repo.action.executer.ActionExecuterAbstractBase;
-import org.alfresco.repo.action.executer.MailActionExecuter;
 import org.alfresco.repo.action.executer.TestModeable;
 import org.alfresco.repo.admin.SysAdminParams;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
@@ -116,7 +116,8 @@ Likewise the template handling with locale is clarified. For bulk its an individ
 And with a bulk email we should probably carry on sending even after errors and then have some sort of bulk report of errors.
 TEMPLATES can be used with either TO and TO_MANY
 */
-public class CustomMailAction extends MailActionExecuter
+public class CustomMailAction extends ActionExecuterAbstractBase
+                                implements InitializingBean, TestModeable
 {
     private static Log logger = LogFactory.getLog(CustomMailAction.class);
     
@@ -124,9 +125,26 @@ public class CustomMailAction extends MailActionExecuter
      * Action executor constants
      */
     public static final String NAME = "custom-mail";
+    public static final String PARAM_LOCALE = "locale";
+    public static final String PARAM_TO = "to";
+    public static final String PARAM_CC = "cc";
+    public static final String PARAM_BCC = "bcc";
+    public static final String PARAM_TO_MANY = "to_many";
+    public static final String PARAM_SUBJECT = "subject";
+    public static final String PARAM_SUBJECT_PARAMS = "subjectParams";
+    public static final String PARAM_TEXT = "text";
+    public static final String PARAM_HTML = "html";
+    public static final String PARAM_FROM = "from";
+    public static final String PARAM_FROM_PERSONAL_NAME = "fromPersonalName";
+    public static final String PARAM_TEMPLATE = "template";
+    public static final String PARAM_TEMPLATE_MODEL = "template_model";
+    public static final String PARAM_IGNORE_SEND_FAILURE = "ignore_send_failure";
+    public static final String PARAM_SEND_AFTER_COMMIT = "send_after_commit";
    
     public static final String PARAM_USE_LIST_HEADERS = "use_list_headers";
     public static final String PARAM_RESPONSE_NODE = "reply_to_node";
+
+    
     /**
      * From address
      */
@@ -192,6 +210,17 @@ public class CustomMailAction extends MailActionExecuter
      */
     private String fromDefaultAddress = null;
     
+    /**
+     * Is the from field enabled? Or must we always use the default address.
+     */
+    private boolean fromEnabled = true;
+    
+    
+    private boolean sendTestMessage = false;
+    private String testMessageTo = null;
+    private String testMessageSubject = "Test message";
+    private String testMessageText = "This is a test message.";
+
     private boolean validateAddresses = true;
     
     /**
@@ -302,13 +331,92 @@ public class CustomMailAction extends MailActionExecuter
         this.imageResolver = imageResolver;
     }
     
-      
+    public void setTestMessageTo(String testMessageTo)
+    {
+        this.testMessageTo = testMessageTo;
+    }
+    
+    public String getTestMessageTo()
+    {
+        return testMessageTo;
+    }
+    
+    public void setTestMessageSubject(String testMessageSubject)
+    {
+        this.testMessageSubject = testMessageSubject;
+    }
+    
+    public void setTestMessageText(String testMessageText)
+    {
+        this.testMessageText = testMessageText;
+    }
+
+    public void setSendTestMessage(boolean sendTestMessage)
+    {
+        this.sendTestMessage = sendTestMessage;
+    }
+    
     /**
      * This stores an email address which, if it is set, overrides ALL email recipients sent from
      * this class. It is intended for dev/test usage only !!
      */
     private String testModeRecipient;
 
+    /**
+     * Send a test message
+     * 
+     * @return true, message sent 
+     * @throws AlfrescoRuntimeException 
+     */
+    public boolean sendTestMessage() 
+    {
+        if(testMessageTo == null || testMessageTo.length() == 0)
+        {
+            throw new AlfrescoRuntimeException("email.outbound.err.test.no.to");
+        }
+        if(testMessageSubject == null || testMessageSubject.length() == 0)
+        {
+            throw new AlfrescoRuntimeException("email.outbound.err.test.no.subject");
+        }
+        if(testMessageText == null || testMessageText.length() == 0)
+        {
+            throw new AlfrescoRuntimeException("email.outbound.err.test.no.text");
+        }
+        Map<String, Serializable> params = new HashMap<String, Serializable>();
+        params.put(PARAM_TO, testMessageTo);
+        params.put(PARAM_SUBJECT, testMessageSubject);
+        params.put(PARAM_TEXT, testMessageText);
+        
+        Action ruleAction = serviceRegistry.getActionService().createAction(NAME, params);
+        
+        MimeMessageHelper message = prepareEmail(ruleAction, null,
+                new Pair<String, Locale>(testMessageTo, getLocaleForUser(testMessageTo)), getFrom(ruleAction));
+        try
+        {
+            mailService.send(message.getMimeMessage());
+            onSend();
+        }
+        catch (MailException me)
+        {
+            onFail();
+            StringBuffer txt = new StringBuffer();
+            
+            txt.append(me.getClass().getName() + ", " + me.getMessage());
+            
+            Throwable cause = me.getCause();
+            while (cause != null)
+            {
+                txt.append(", ");
+                txt.append(cause.getClass().getName() + ", " + cause.getMessage());
+                cause = cause.getCause();
+            }
+            
+            Object[] args = {testMessageTo, txt.toString()};
+            throw new AlfrescoRuntimeException("email.outbound.err.send.failed", args, me);
+        }
+        
+        return true;
+    }
     
     public void setTestModeRecipient(String testModeRecipient)
     {
@@ -321,7 +429,49 @@ public class CustomMailAction extends MailActionExecuter
     }
 
     
- 
+    @Override
+    public void init()
+    {
+        if(logger.isDebugEnabled())
+        {
+            logger.debug("Init called, testMessageTo=" + testMessageTo);
+        }
+        
+        numberSuccessfulSends.set(0);
+        numberFailedSends.set(0);
+        
+        super.init();
+        if (sendTestMessage && testMessageTo != null)
+        {
+            AuthenticationUtil.runAs(new RunAsWork<Object>()
+            {
+                public Object doWork() throws Exception
+                {
+                    Map<String, Serializable> params = new HashMap<String, Serializable>();
+                    params.put(PARAM_TO, testMessageTo);
+                    params.put(PARAM_SUBJECT, testMessageSubject);
+                    params.put(PARAM_TEXT, testMessageText);
+
+                    Action ruleAction = serviceRegistry.getActionService().createAction(NAME, params);
+                    executeImpl(ruleAction, null);
+                    return null;
+                }
+            }, AuthenticationUtil.getSystemUserName());
+        }
+    }
+
+    /**
+     * Initialise bean
+     */
+    public void afterPropertiesSet() throws Exception
+    {
+        if (fromDefaultAddress == null || fromDefaultAddress.length() == 0)
+        {
+            fromDefaultAddress = FROM_ADDRESS;
+        }
+        
+    }
+    
     /**
      * Send an email message
      * 
@@ -463,6 +613,13 @@ public class CustomMailAction extends MailActionExecuter
                     mimeMessage.setHeader("Content-Transfer-Encoding", headerEncoding);
                 }
                 
+                Boolean listHeaders = (Boolean) ruleAction.getParameterValue(PARAM_USE_LIST_HEADERS);
+                if (listHeaders != null && listHeaders.booleanValue()) {
+                	mimeMessage.setHeader("X-Auto-Response-Suppress:", "All");
+                	mimeMessage.setHeader("Precedence:", "list");
+                	mimeMessage.setHeader("auto-submitted:", "auto-generated");
+                }
+                          
                 // set recipient
                 String to = (String)ruleAction.getParameterValue(PARAM_TO);
                 if (to != null && to.length() != 0)
@@ -687,6 +844,7 @@ public class CustomMailAction extends MailActionExecuter
                         {
                             messageRef[0].setFrom(from);
                         }
+                        setReplyTo(ruleAction, messageRef, from);
                     }
                     else
                     {
@@ -704,11 +862,13 @@ public class CustomMailAction extends MailActionExecuter
                                 logger.debug("looked up email address for :" + fromPerson + " email from " + fromActualUser);
                             }
                             messageRef[0].setFrom(fromActualUser);
+                            setReplyTo(ruleAction, messageRef, fromActualUser);
                         }
                         else
                         {
                             // from system or user does not have email address
                             messageRef[0].setFrom(fromDefaultAddress);
+                            setReplyTo(ruleAction, messageRef, fromDefaultAddress);
                         }
                     }
 
@@ -721,6 +881,7 @@ public class CustomMailAction extends MailActionExecuter
                     }
                     // from is not enabled.
                     messageRef[0].setFrom(fromDefaultAddress);
+                    setReplyTo(ruleAction, messageRef, fromDefaultAddress);
                 }
                 
 
@@ -869,6 +1030,23 @@ public class CustomMailAction extends MailActionExecuter
                 }
                 
             }
+
+			private void setReplyTo(final Action ruleAction, final MimeMessageHelper[] messageRef, String from)
+					throws MessagingException {
+				Object responseNode =  ruleAction.getParameterValue(PARAM_RESPONSE_NODE);
+                
+                if (responseNode != null) {
+                	String responseText;
+                	if (responseNode instanceof Long) {
+                		responseText = responseNode.toString();
+                	} else {
+                		responseText = (String) responseNode;
+                	}
+                	//Assuming address is valid...
+                	String[] parts = from.split("@");
+                	messageRef[0].setReplyTo(parts[0] + "+" + responseNode + "@" + parts[1]);
+                }
+			}
         };
         MimeMessage mimeMessage = mailService.createMimeMessage(); 
         try
@@ -1201,7 +1379,71 @@ public class CustomMailAction extends MailActionExecuter
         }
         return recipients.values();
     }
-                
+    
+    public boolean personExists(final String user)
+    {
+        boolean exists = false;
+        String domain = tenantService.getPrimaryDomain(user); // get primary tenant 
+        if (domain != null) 
+        { 
+            exists = TenantUtil.runAsTenant(new TenantRunAsWork<Boolean>()
+            {
+                public Boolean doWork() throws Exception
+                {
+                    return personService.personExists(user);
+                }
+            }, domain);
+        }
+        else
+        {
+            exists = personService.personExists(user);
+        }
+        return exists;
+    }
+    
+    public NodeRef getPerson(final String user)
+    {
+        NodeRef person = null;
+        String domain = tenantService.getPrimaryDomain(user); // get primary tenant 
+        if (domain != null) 
+        { 
+            person = TenantUtil.runAsTenant(new TenantRunAsWork<NodeRef>()
+            {
+                public NodeRef doWork() throws Exception
+                {
+                    return personService.getPerson(user);
+                }
+            }, domain);
+        }
+        else
+        {
+            person = personService.getPerson(user);
+        }
+        return person;
+    }
+    
+    public String getPersonEmail(final String user)
+    {
+        final NodeRef person = getPerson(user);
+        String email = null;
+        String domain = tenantService.getPrimaryDomain(user); // get primary tenant 
+        if (domain != null) 
+        { 
+            email = TenantUtil.runAsTenant(new TenantRunAsWork<String>()
+            {
+                public String doWork() throws Exception
+                {
+                    return (String) nodeService.getProperty(person, ContentModel.PROP_EMAIL);
+                }
+            }, domain);
+        }
+        else
+        {
+            email = (String) nodeService.getProperty(person, ContentModel.PROP_EMAIL);
+        }
+        return email;
+    }
+    
     /**
      * Gets the specified user's preferred locale, if available.
      * 
@@ -1348,10 +1590,20 @@ public class CustomMailAction extends MailActionExecuter
     @Override
     protected void addParameterDefinitions(List<ParameterDefinition> paramList) 
     {
-    	super.addParameterDefinitions(paramList);
+        paramList.add(new ParameterDefinitionImpl(PARAM_TO, DataTypeDefinition.TEXT, false, getParamDisplayLabel(PARAM_TO)));
+        paramList.add(new ParameterDefinitionImpl(PARAM_CC, DataTypeDefinition.TEXT, false, getParamDisplayLabel(PARAM_CC)));
+        paramList.add(new ParameterDefinitionImpl(PARAM_BCC, DataTypeDefinition.TEXT, false, getParamDisplayLabel(PARAM_BCC)));
+        paramList.add(new ParameterDefinitionImpl(PARAM_TO_MANY, DataTypeDefinition.ANY, false, getParamDisplayLabel(PARAM_TO_MANY), true));
+        paramList.add(new ParameterDefinitionImpl(PARAM_SUBJECT, DataTypeDefinition.TEXT, true, getParamDisplayLabel(PARAM_SUBJECT)));
+        paramList.add(new ParameterDefinitionImpl(PARAM_TEXT, DataTypeDefinition.TEXT, false, getParamDisplayLabel(PARAM_TEXT)));
+        paramList.add(new ParameterDefinitionImpl(PARAM_FROM, DataTypeDefinition.TEXT, false, getParamDisplayLabel(PARAM_FROM)));
+        paramList.add(new ParameterDefinitionImpl(PARAM_TEMPLATE, DataTypeDefinition.NODE_REF, false, getParamDisplayLabel(PARAM_TEMPLATE), false, "ac-email-templates"));
+        paramList.add(new ParameterDefinitionImpl(PARAM_TEMPLATE_MODEL, DataTypeDefinition.ANY, false, getParamDisplayLabel(PARAM_TEMPLATE_MODEL), true));
+        paramList.add(new ParameterDefinitionImpl(PARAM_IGNORE_SEND_FAILURE, DataTypeDefinition.BOOLEAN, false, getParamDisplayLabel(PARAM_IGNORE_SEND_FAILURE)));
+        //Is text because it could be either a node-dbid or an alias
+        paramList.add(new ParameterDefinitionImpl(PARAM_RESPONSE_NODE, DataTypeDefinition.TEXT, false, getParamDisplayLabel(PARAM_RESPONSE_NODE)));
+        paramList.add(new ParameterDefinitionImpl(PARAM_USE_LIST_HEADERS, DataTypeDefinition.BOOLEAN, false, getParamDisplayLabel(PARAM_USE_LIST_HEADERS)));
 
-        paramList.add(new ParameterDefinitionImpl(PARAM_RESPONSE_NODE, DataTypeDefinition.TEXT, false, getParamDisplayLabel(PARAM_FROM)));
-        paramList.add(new ParameterDefinitionImpl(PARAM_USE_LIST_HEADERS, DataTypeDefinition.BOOLEAN, false, getParamDisplayLabel(PARAM_IGNORE_SEND_FAILURE)));
     }
 
     public void setTestMode(boolean testMode)
@@ -1364,4 +1616,100 @@ public class CustomMailAction extends MailActionExecuter
         return testMode;
     }
 
+    /**
+     * Returns the most recent message that wasn't sent
+     *  because TestMode had been enabled.
+     */
+    public MimeMessage retrieveLastTestMessage()
+    {
+        return lastTestMessage; 
+    }
+    
+    public int getTestSentCount()
+    {
+        return testSentCount; 
+    }
+    
+    public int resetTestSentCount()
+    {
+        return testSentCount = 0; 
+    }
+    
+    /**
+     * Used when test mode is enabled.
+     * Clears the record of the last message that was sent. 
+     */
+    public void clearLastTestMessage()
+    {
+        lastTestMessage = null;
+    }
+
+    public void setFromEnabled(boolean fromEnabled)
+    {
+        this.fromEnabled = fromEnabled;
+    }
+
+    public boolean isFromEnabled()
+    {
+        return fromEnabled;
+    }
+
+    public static boolean isHTML(String value)
+    {
+        boolean result = false;
+
+        // Note: only simplistic match here - expects <html tag at the start of the text
+        String htmlPrefix = "<html";
+        String trimmedText = value.trim();
+        if (trimmedText.length() >= htmlPrefix.length() &&
+                trimmedText.substring(0, htmlPrefix.length()).equalsIgnoreCase(htmlPrefix))
+        {
+            result = true;
+        }
+
+        return result;
+    }
+
+    public static class URLHelper
+    {
+        private final SysAdminParams sysAdminParams;
+        
+        public URLHelper(SysAdminParams sysAdminParams)
+        {
+            this.sysAdminParams = sysAdminParams;
+        }
+        
+        public String getContext()
+        {
+           return "/" + sysAdminParams.getAlfrescoContext();
+        }
+
+        public String getServerPath()
+        {
+            return sysAdminParams.getAlfrescoProtocol() + "://" + sysAdminParams.getAlfrescoHost() + ":"
+                    + sysAdminParams.getAlfrescoPort();
+        }
+    }
+    
+    static AtomicInteger numberSuccessfulSends = new AtomicInteger(0);
+    static AtomicInteger numberFailedSends = new AtomicInteger(0);
+    protected void onSend()
+    {
+        numberSuccessfulSends.getAndIncrement();
+    }
+    
+    protected void onFail()
+    {
+        numberFailedSends.getAndIncrement();
+    }
+    
+    public int getNumberSuccessfulSends()
+    {
+        return numberSuccessfulSends.get();
+    }
+        
+    public int getNumberFailedSends()
+    {   
+        return numberFailedSends.get();
+    }
 }

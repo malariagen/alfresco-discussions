@@ -18,22 +18,28 @@
 -->
 <beans>
     
-    <!-- A simple class that is initialized by Spring -->
-    <bean id="net.malariagen.alfresco.exampleBean" class="net.malariagen.alfresco.platformsample.Demo" init-method="init" />
-
-    <!-- A simple module component that will be executed once.
-         Note. this module component will only be executed once, and then there will be an entry for it in the Repo.
-         So doing for example $ mvn clean install -Prun twice will only execute this component the first time.
-         You need to remove /alf_data_dev for it to be executed again. -->
-    <bean id="net.malariagen.alfresco.exampleComponent" class="net.malariagen.alfresco.platformsample.DemoComponent" parent="module.baseComponent" >
-        <property name="moduleId" value="email" />  <!-- See module.properties -->
-        <property name="name" value="exampleComponent" />
-        <property name="description" value="A demonstration component" />
-        <property name="sinceVersion" value="1.0" />
-        <property name="appliesFromVersion" value="1.0" />
-        <property name="nodeService" ref="NodeService" />
-        <property name="nodeLocatorService" ref="nodeLocatorService" />
+    <bean id="${project.artifactId}_actionResourceBundles" parent="actionResourceBundles">
+		<property name="resourceBundles">
+			<list>
+				<value>alfresco.module.${project.artifactId}.messages.actions</value>
+			</list>
+		</property>
+	</bean>
+	
+	<!-- Import mail action executor from the OutboundSMTP subsystem -->
+    <bean id="custom-mail" class="org.alfresco.repo.management.subsystems.SubsystemProxyFactory">
+        <property name="sourceApplicationContextFactory">
+            <ref bean="OutboundSMTP" />
+        </property>
+        <property name="sourceBeanName">
+        	<value>custom-mail</value>
+      	</property>
+        <property name="interfaces">
+            <list>
+                <value>org.alfresco.repo.action.executer.ActionExecuter</value>
+                <value>org.alfresco.repo.action.executer.TestModeable</value>
+            </list>
+        </property>
     </bean>
-
-    
+	
 </beans>
