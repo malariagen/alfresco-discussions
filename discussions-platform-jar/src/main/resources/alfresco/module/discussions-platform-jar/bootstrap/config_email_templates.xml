@@ -23,10 +23,27 @@
           <app:editInline>true</app:editInline>
           <cm:description>This is a custom email template.</cm:description>
           <cm:content>contentUrl=classpath:alfresco/module/discussions-platform-jar/bootstrap/share_discussion_notification.ftl|mimetype=text/plain|size=|encoding=UTF-8|locale=en_US_</cm:content>
-          <cm:title>My first email template</cm:title>
+          <cm:title>Notification template for HTML</cm:title>
           <cm:author>admin</cm:author>
           <cm:name>share_discussion_notification.ftl</cm:name>
           <sys:node-uuid>custom-discussion-templates-html</sys:node-uuid>
+        </view:properties>
+        <view:associations></view:associations>
+      </cm:content>
+      <cm:content view:childName="cm:share_discussion_notification_plain_content.ftl">
+        <view:aspects>
+          <cm:titled />
+          <cm:author />
+          <app:inlineeditable />
+        </view:aspects>
+        <view:properties>
+          <app:editInline>true</app:editInline>
+          <cm:description>This is a custom email template.</cm:description>
+          <cm:content>contentUrl=classpath:alfresco/module/discussions-platform-jar/bootstrap/share_discussion_notification_plain_content.ftl|mimetype=text/plain|size=|encoding=UTF-8|locale=en_US_</cm:content>
+          <cm:title>Notification template for plain text</cm:title>
+          <cm:author>admin</cm:author>
+          <cm:name>share_discussion_notification_plain_content.ftl</cm:name>
+          <sys:node-uuid>custom-discussion-templates-plain</sys:node-uuid>
         </view:properties>
         <view:associations></view:associations>
       </cm:content>
