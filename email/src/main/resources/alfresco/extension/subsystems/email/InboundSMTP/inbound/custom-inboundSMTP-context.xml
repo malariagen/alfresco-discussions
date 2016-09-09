@@ -1,0 +1,110 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!--
+	Licensed to the Apache Software Foundation (ASF) under one or more
+	contributor license agreements. 
+	The ASF licenses this file to You under the Apache License, Version 2.0
+	(the "License"); you may not use this file except in compliance with
+	the License.  You may obtain a copy of the License at
+	
+	http://www.apache.org/licenses/LICENSE-2.0
+	
+	Unless required by applicable law or agreed to in writing, software
+	distributed under the License is distributed on an "AS IS" BASIS,
+	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+	See the License for the specific language governing permissions and
+	limitations under the License.
+	
+-->
+<!DOCTYPE beans PUBLIC '-//SPRING//DTD BEAN//EN' 'http://www.springframework.org/dtd/spring-beans.dtd'>
+
+<beans>
+	<!-- This is filtered by Maven at build time, so that module name is single sourced. -->
+    <import resource="classpath:alfresco/module/${project.artifactId}/context/service-context.xml" />
+    <import resource="classpath:alfresco/module/${project.artifactId}/context/bootstrap-context.xml" />
+	<import resource="classpath:alfresco/module/${project.artifactId}/context/webscript-context.xml" />
+
+        <bean id="emailService" class="net.malariagen.alfresco.email.server.CustomEmailServiceImpl"
+            init-method="init">
+                <property name="emailInboundEnabled">
+                        <value>${email.inbound.enabled}</value>
+                </property>
+                <property name="unknownUser">
+           <value>${email.inbound.unknownUser}</value>
+                </property>
+                <property name="emailContributorsAuthority">
+           <value>${email.inbound.emailContributorsAuthority}</value>
+        </property>
+                <property name="emailMessageHandlerMap">
+                        <map>
+                                <entry key="cm:folder">
+                                        <ref bean="folderEmailMessageHandler"></ref>
+                                </entry>
+                                <entry key="cm:content">
+                                        <ref bean="documentEmailMessageHandler"></ref>
+                                </entry>
+                                <entry key="fm:forum">
+                                        <ref bean="forumEmailMessageHandler"></ref>
+                                </entry>
+                                <entry key="fm:discussion">
+                                        <ref bean="forumEmailMessageHandler"></ref>
+                                </entry>
+                                <entry key="fm:topic">
+                                        <ref bean="topicEmailMessageHandler"></ref>
+                                </entry>
+                                <entry key="fm:post">
+                                        <ref bean="topicEmailMessageHandler"></ref>
+                                </entry>
+                        </map>
+                </property>
+                <property name="namespaceService">
+                        <ref bean="NamespaceService" />
+                </property>
+                <property name="nodeService">
+                        <ref bean="NodeService" />
+                </property>
+                <property name="searchService">
+                        <ref bean="SearchService" />
+                </property>
+            <property name="attributeService">
+            <ref bean="attributeService" />
+        </property>
+                <property name="retryingTransactionHelper">
+                        <ref bean="retryingTransactionHelper" />
+                </property>
+        <property name="authorityService">
+            <ref bean="authorityService" />
+        </property>
+        <property name="dictionaryService">
+            <ref bean="DictionaryService" />
+        </property>
+    </bean>
+
+        <bean id="emailMessageHandlerBase" abstract="true">
+                <property name="dictionaryService">
+                        <ref bean="DictionaryService" />
+                </property>
+                <property name="nodeService">
+                        <ref bean="NodeService" />
+                </property>
+                <property name="contentService">
+                        <ref bean="ContentService" />
+                </property>
+                <property name="mimetypeService">
+                        <ref bean="MimetypeService" />
+                </property>
+        </bean>
+
+        <bean id="folderEmailMessageHandler"
+                parent="emailMessageHandlerBase"
+                class="org.alfresco.email.server.handler.FolderEmailMessageHandler" >
+
+                <property name="overwriteDuplicates">
+                    <value>${email.handler.folder.overwriteDuplicates}</value>
+        </property>
+    </bean>
+
+        <bean id="topicEmailMessageHandler"
+                parent="emailMessageHandlerBase"
+                class="net.malariagen.alfresco.email.server.handler.CustomTopicEmailMessageHandler" />
+
+</beans>
