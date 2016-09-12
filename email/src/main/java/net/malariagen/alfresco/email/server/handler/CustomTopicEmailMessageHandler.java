@@ -19,6 +19,9 @@ import org.alfresco.util.PropertyMap;
 import java.io.InputStream;
 import org.alfresco.service.cmr.repository.MimetypeService;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
+import org.alfresco.service.cmr.repository.ContentReader;
+import org.alfresco.service.cmr.repository.ContentService;
+import org.alfresco.service.cmr.repository.ContentWriter;
 import org.alfresco.service.namespace.NamespaceService;
 /**
  * Handler implementation address to topic node.
@@ -113,15 +116,33 @@ public class CustomTopicEmailMessageHandler extends TopicEmailMessageHandler
                 MimetypeService mimetypeService = getMimetypeService();
                 String mimetype = mimetypeService.guessMimetype(fileName);
                 String encoding = attachment.getEncoding();
-                if (fileName.startsWith(message.getSubject() + " (part ") && mimetype.startsWith("text/html")) {
+                if (fileName.startsWith(message.getSubject() + " (part ") && mimetype.startsWith(MimetypeMap.MIMETYPE_HTML)) {
               	    body = attachment;
                 }
             }
-            writeContent(
-                    postNodeRef,
-                    body.getContent(),
-                    body.getContentType(),
-                    body.getEncoding());
+
+            writeContent(
+
+                    postNodeRef,
+
+                    body.getContent(),
+
+                    body.getContentType(),
+
+                    body.getEncoding());
+
+            //Surround plain text with pre
+            if (body.getContentType().startsWith(MimetypeMap.MIMETYPE_TEXT_PLAIN)) {
+            	ContentService contentService = getContentService();
+            	ContentReader contentReader = contentService.getReader(postNodeRef, ContentModel.PROP_CONTENT);
+            	//It's reasonably safe to assume that the message will be quite small
+            	String content = contentReader.getContentString();
+            	
+                ContentWriter writer = contentService.getWriter(postNodeRef, ContentModel.PROP_CONTENT, true);                
+                writer.setMimetype(MimetypeMap.MIMETYPE_HTML);
+                writer.putContent("<pre>" + content + "</pre>");
+            	
+            } 
         }
         else
         {
