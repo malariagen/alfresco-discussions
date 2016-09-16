@@ -30,6 +30,23 @@
         </view:properties>
         <view:associations></view:associations>
       </cm:content>
+      <cm:content view:childName="cm:cron-site-email-contributors.js">
+        <view:aspects>
+          <cm:titled />
+          <cm:author />
+          <app:inlineeditable />
+        </view:aspects>
+        <view:properties>
+          <app:editInline>true</app:editInline>
+          <cm:description>Make sure all site members are in the EMAIL_CONTRIBUTORS group</cm:description>
+   <cm:content>contentUrl=classpath:alfresco/module/discussions-platform-jar/bootstrap/cron-site-email-contributors.js|mimetype=application/x-javascript|size=|encoding=UTF-8|locale=en_US_</cm:content>
+          <cm:title>cron-site-email-contributors</cm:title>
+          <cm:author>admin</cm:author>
+          <cm:name>cron-site-email-contributors.js</cm:name>
+          <sys:node-uuid>cron-site-email-contributors</sys:node-uuid>
+        </view:properties>
+        <view:associations></view:associations>
+      </cm:content>
     </cm:contains>
   </cm:folder>
 </view:view>      
