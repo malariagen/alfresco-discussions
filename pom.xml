@@ -197,9 +197,9 @@
                         </moduleDependency>
                         <moduleDependency>
                             <groupId>${project.groupId}</groupId>
-                            <artifactId>email</artifactId>
+                            <artifactId>discussions-email</artifactId>
                             <version>${project.version}</version>
-                            <type>amp</type>
+                            <type>jar</type>
                         </moduleDependency>
                         <moduleDependency>
                             <groupId>de.fmaul</groupId>
@@ -348,6 +348,6 @@
   <modules>
     <module>discussions-platform-jar</module>
     <module>discussions-share-jar</module>
-    <module>email</module>
+    <module>discussions-email</module>
   </modules>
 </project>
