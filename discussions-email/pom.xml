@@ -13,56 +13,6 @@
     <description>Platform JAR Module (to be included in the alfresco.war) - SDK 3</description>
     <packaging>jar</packaging>
 
-    <properties>
-        <!-- Alfresco Maven Plugin version to use -->
-        <alfresco.sdk.version>3.0.0-beta-3</alfresco.sdk.version>
-
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-
-        <!-- Alfresco Data directory, which will contain:
-                Content Store (i.e. the files we upload)
-                Database (i.e. the metadata for the uploaded files)
-                Search index (i.e. the indexed content and metadata)
-             Configured in alfresco-global.properties with the 'dir.root' property.
-                -->
-        <alfresco.data.location>${session.executionRootDirectory}/alf_data_dev</alfresco.data.location>
-
-        <!-- Duplicated with alfresco.solrHome in the plugin, we need them out here to do filtering -->
-        <solr.home>${alfresco.data.location}/solr</solr.home>
-        <solr.model.dir>${solr.home}/alfrescoModels</solr.model.dir>
-        <solr.content.dir>${solr.home}/index</solr.content.dir>
-
-        <!-- Properties used in dependency declarations, you don't need to change these -->
-        <alfresco.groupId>org.alfresco</alfresco.groupId>
-
-        <!-- Alfresco Platform webapp version, this is the original Alfresco webapp that will be
-            customized and then deployed and run by the tomcat maven plugin when
-            executing for example $ mvn clean install alfresco:run -->
-        <alfresco.platform.version>5.2.a-EA</alfresco.platform.version>
-        <!-- Alfresco Share version, so we can bring in correct alfresco-share-services artifact -->
-        <alfresco.share.version>5.1.g</alfresco.share.version>
-
-        <!-- Alfresco Repo Database configuration.
-           By default it uses a flat file H2 database to be able to run embedded.
-           The H2 database implementation is brought in via the tomcat7-maven-plugin as a dependency.
-           The data files for the H2 database will be created in a relative path, such as alf_data_dev/h2_data/alf_dev,
-           see alfresco.db.url below.
-           For more information about the db parameters see:http://www.h2database.com/html/features.html
-        -->
-        <alfresco.db.name>alf_dev</alfresco.db.name>
-        <alfresco.db.username>alfresco</alfresco.db.username>
-        <alfresco.db.password>alfresco</alfresco.db.password>
-        <alfresco.db.params>AUTO_SERVER=TRUE;DB_CLOSE_ON_EXIT=FALSE;LOCK_TIMEOUT=10000;MVCC=FALSE;LOCK_MODE=0</alfresco.db.params>
-        <alfresco.db.url>jdbc:h2:${alfresco.data.location}/h2_data/${alfresco.db.name};${alfresco.db.params}</alfresco.db.url>
-        <alfresco.db.datasource.class>org.h2.jdbcx.JdbcDataSource</alfresco.db.datasource.class>
-
-        <!-- JRebel Hot reloading of classpath stuff and web resource stuff -->
-        <jrebel.version>1.1.6</jrebel.version>
-
-        <!-- Environment to use, Alfresco Maven Plugin will copy alfresco-global.properties from this directory -->
-        <env>local</env>
-    </properties>
-
     <!-- This will import the dependencyManagement for all artifacts in the selected Alfresco platform.
             NOTE: You still need to define dependencies in your POM,
             but you can omit version as it's enforced by this dependencyManagement.
@@ -81,12 +31,44 @@
         </dependencies>
     </dependencyManagement>
 
-    <dependencies>
-        <!-- The main Alfresco Repo dependency for compiling Java code in src/main/java -->
-        <dependency>
-            <groupId>${alfresco.groupId}</groupId>
-            <artifactId>alfresco-repository</artifactId>
-        </dependency>
+	<dependencies>
+		<!-- The main Alfresco Repo dependency for compiling Java code in src/main/java -->
+		<dependency>
+			<groupId>${alfresco.groupId}</groupId>
+			<artifactId>alfresco-repository</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>${alfresco.groupId}</groupId>
+			<artifactId>alfresco-repository</artifactId>
+			<version>${alfresco.platform.version}</version>
+			<classifier>tests</classifier>
+			<scope>test</scope>
+		</dependency>
+		
+		      <!-- Enables JUnit remote testing (using JRebel) -->
+       <dependency>
+            <groupId>com.tradeshift</groupId>
+            <artifactId>junit-remote</artifactId>
+            <version>3</version>
+            <type>jar</type>
+            <exclusions>
+                <exclusion>
+                    <artifactId>servlet-api</artifactId>
+                    <groupId>javax.servlet</groupId>
+                </exclusion>
+            </exclusions>
+            <scope>test</scope>
+       </dependency>
+
+       <!-- Required to have annotation based remote testing working -->
+       <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-test</artifactId>
+            <version>3.2.14.RELEASE</version>
+            <type>jar</type>
+            <scope>test</scope>
+       </dependency>
+		
     </dependencies>
 
     <build>
