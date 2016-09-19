@@ -24,7 +24,7 @@
                         <value>script-ref</value>
                     </key>
                     <!-- Note that as of Alfresco 4.0, due to a  Spring upgrade, the FreeMarker ${foo} entries must be escaped --> 
-                    <value>\$\{selectSingleNode('workspace://SpacesStore', 'lucene', 'PATH:"/app:company_home/app:dictionary/app:scripts/cm:Discussion Scripts/cm:cron-site-email-contributors.js"' )\}</value>
+                    <value>\$\{selectSingleNode('workspace://SpacesStore', 'lucene', 'PATH:"/app:company_home/app:dictionary/app:scripts/cm:Discussion_x0020_Scripts/cm:cron-site-email-contributors.js"' )\}</value>
                 </entry>
             </map>
         </property>
@@ -70,16 +70,16 @@
             <value>0 0/30 * * * ?</value>
         </property>
         <property name="jobName">
-            <value>manageLdapGroup</value>
+            <value>manageEmailContributors</value>
         </property>
         <property name="jobGroup">
-            <value>cgghGroup</value>
+            <value>MalariagenDiscussionsGroup</value>
         </property>
         <property name="triggerName">
-            <value>triggerB</value>
+            <value>manageEmailContributorsTrigger</value>
         </property>
         <property name="triggerGroup">
-            <value>triggerGroup</value>
+            <value>manageEmailContributorsTriggerGroup</value>
         </property>
         <property name="scheduler">
             <ref bean="schedulerFactory"/>
