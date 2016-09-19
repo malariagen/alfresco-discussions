@@ -32,7 +32,7 @@ if (document.getType() == "{http://www.alfresco.org/model/forum/1.0}post") {
 
     //For custom mail action
 	mail.parameters.reply_to_node = document.properties["sys:node-dbid"];
-	mail.parameters.use_list_headers = true;
+	mail.parameters.list_id = site;
 	  
     mail.parameters.subject="New Post in Discussion: "+document.parent.childAssocs["cm:contains"][0].properties.title;
 
