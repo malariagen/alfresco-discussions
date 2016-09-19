@@ -141,7 +141,7 @@ public class CustomMailAction extends ActionExecuterAbstractBase
     public static final String PARAM_IGNORE_SEND_FAILURE = "ignore_send_failure";
     public static final String PARAM_SEND_AFTER_COMMIT = "send_after_commit";
    
-    public static final String PARAM_USE_LIST_HEADERS = "use_list_headers";
+    public static final String PARAM_LIST_ID = "list_id";
     public static final String PARAM_RESPONSE_NODE = "reply_to_node";
 
     
@@ -613,11 +613,13 @@ public class CustomMailAction extends ActionExecuterAbstractBase
                     mimeMessage.setHeader("Content-Transfer-Encoding", headerEncoding);
                 }
                 
-                Boolean listHeaders = (Boolean) ruleAction.getParameterValue(PARAM_USE_LIST_HEADERS);
-                if (listHeaders != null && listHeaders.booleanValue()) {
-                	mimeMessage.setHeader("X-Auto-Response-Suppress:", "All");
-                	mimeMessage.setHeader("Precedence:", "list");
-                	mimeMessage.setHeader("auto-submitted:", "auto-generated");
+                String listHeaders = (String) ruleAction.getParameterValue(PARAM_LIST_ID);
+                if (listHeaders != null) {
+                	mimeMessage.setHeader("List-Id", "<" + listHeaders + ">");
+                	mimeMessage.setHeader("X-Auto-Response-Suppress", "All");
+                	mimeMessage.setHeader("Precedence", "list");
+                	mimeMessage.setHeader("Precedence", "bulk");
+                	mimeMessage.setHeader("auto-submitted", "auto-generated");
                 }
                           
                 // set recipient
@@ -862,7 +864,7 @@ public class CustomMailAction extends ActionExecuterAbstractBase
                                 logger.debug("looked up email address for :" + fromPerson + " email from " + fromActualUser);
                             }
                             messageRef[0].setFrom(fromActualUser);
-                            setReplyTo(ruleAction, messageRef, fromActualUser);
+                            setReplyTo(ruleAction, messageRef, fromDefaultAddress);
                         }
                         else
                         {
@@ -1602,7 +1604,7 @@ public class CustomMailAction extends ActionExecuterAbstractBase
         paramList.add(new ParameterDefinitionImpl(PARAM_IGNORE_SEND_FAILURE, DataTypeDefinition.BOOLEAN, false, getParamDisplayLabel(PARAM_IGNORE_SEND_FAILURE)));
         //Is text because it could be either a node-dbid or an alias
         paramList.add(new ParameterDefinitionImpl(PARAM_RESPONSE_NODE, DataTypeDefinition.TEXT, false, getParamDisplayLabel(PARAM_RESPONSE_NODE)));
-        paramList.add(new ParameterDefinitionImpl(PARAM_USE_LIST_HEADERS, DataTypeDefinition.BOOLEAN, false, getParamDisplayLabel(PARAM_USE_LIST_HEADERS)));
+        paramList.add(new ParameterDefinitionImpl(PARAM_LIST_ID, DataTypeDefinition.TEXT, false, getParamDisplayLabel(PARAM_LIST_ID)));
 
     }
 
@@ -1688,6 +1690,17 @@ public class CustomMailAction extends ActionExecuterAbstractBase
         {
             return sysAdminParams.getAlfrescoProtocol() + "://" + sysAdminParams.getAlfrescoHost() + ":"
                     + sysAdminParams.getAlfrescoPort();
+        }
+        
+        public String getShareContext()
+        {
+           return "/" + sysAdminParams.getShareContext();
+        }
+
+        public String getShareServerPath()
+        {
+            return sysAdminParams.getShareProtocol() + "://" + sysAdminParams.getShareHost() + ":"
+                    + sysAdminParams.getSharePort();
         }
     }
     
