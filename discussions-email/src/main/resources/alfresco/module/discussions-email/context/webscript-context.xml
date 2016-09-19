@@ -17,8 +17,4 @@
 	limitations under the License.
 -->
 <beans>
-	<bean id="webscript.alfresco.tutorials.helloworld.get"
-		  class="net.malariagen.alfresco.platformsample.HelloWorldWebScript"
-		  parent="webscript">
-	</bean>
 </beans>
