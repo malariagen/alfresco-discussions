@@ -35,7 +35,7 @@
         <!-- Alfresco Platform and Share webapp versions, these are the original Alfresco webapps that will be
              customized and then deployed and run by the tomcat maven plugin when
              executing for example $ mvn clean install alfresco:run -->
-        <alfresco.platform.version>5.2.a-EA</alfresco.platform.version>
+        <alfresco.platform.version>5.1.g</alfresco.platform.version>
         <alfresco.share.version>5.1.g</alfresco.share.version>
 
         <!-- Alfresco Surf version, if you change Share version you might need to change Surf version -->
