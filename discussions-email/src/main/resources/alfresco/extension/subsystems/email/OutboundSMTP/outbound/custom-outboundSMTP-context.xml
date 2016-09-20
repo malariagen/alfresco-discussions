@@ -7,14 +7,14 @@
    <!-- MAIL SERVICE           -->
    <!--                        -->
     <import resource="classpath:alfresco/subsystems/email/OutboundSMTP/mail-template-services-context.xml"/>
-    
+ 
    <bean id="custom-mail" class="net.malariagen.alfresco.action.CustomMailAction" parent="action-executer">
         <property name="queueName" value="outboundMail"/>
         <property name="mailService">
             <ref bean="mailService"></ref>
         </property>
         <property name="activityService">
-            <ref bean="activityService"></ref>
+            <ref bean="custom-activityService"></ref>
         </property>
         <property name="templateService">
             <ref bean="mailTemplateService"></ref>
