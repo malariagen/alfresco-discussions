@@ -615,10 +615,10 @@ public class CustomMailAction extends ActionExecuterAbstractBase
                 
                 String listHeaders = (String) ruleAction.getParameterValue(PARAM_LIST_ID);
                 if (listHeaders != null) {
-                	mimeMessage.setHeader("List-Id", "<" + listHeaders + ">");
+                	mimeMessage.setHeader("List-Id", "<" + listHeaders + "." + sysAdminParams.getAlfrescoHost() + ">");
                 	mimeMessage.setHeader("X-Auto-Response-Suppress", "All");
                 	mimeMessage.setHeader("Precedence", "list");
-                	mimeMessage.setHeader("Precedence", "bulk");
+                	mimeMessage.addHeader("Precedence", "bulk");
                 	mimeMessage.setHeader("auto-submitted", "auto-generated");
                 }
                           
