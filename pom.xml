@@ -350,4 +350,12 @@
     <module>discussions-share-jar</module>
     <module>discussions-email</module>
   </modules>
+
+  <scm>
+        <connection>scm:git:git@github.com:malariagen/alfresco-discussions.git</connection>
+        <url>scm:git:git@github.com:malariagen/alfresco-discussions.git</url>
+        <developerConnection>scm:git:git@github.com:malariagen/alfresco-discussions.git</developerConnection>
+      <tag>HEAD</tag>
+  </scm>
+
 </project>
