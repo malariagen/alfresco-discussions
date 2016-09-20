@@ -13,6 +13,9 @@
         <property name="mailService">
             <ref bean="mailService"></ref>
         </property>
+        <property name="activityService">
+            <ref bean="activityService"></ref>
+        </property>
         <property name="templateService">
             <ref bean="mailTemplateService"></ref>
         </property>

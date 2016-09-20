@@ -58,6 +58,8 @@ import org.alfresco.repo.transaction.TransactionListenerAdapter;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.action.Action;
 import org.alfresco.service.cmr.action.ParameterDefinition;
+import org.alfresco.service.cmr.activities.ActivityService;
+import org.alfresco.service.cmr.activities.FeedControl;
 import org.alfresco.service.cmr.dictionary.DataTypeDefinition;
 import org.alfresco.service.cmr.preference.PreferenceService;
 import org.alfresco.service.cmr.repository.NodeRef;
@@ -143,7 +145,7 @@ public class CustomMailAction extends ActionExecuterAbstractBase
    
     public static final String PARAM_LIST_ID = "list_id";
     public static final String PARAM_RESPONSE_NODE = "reply_to_node";
-
+    public static final String PARAM_SITE_ACTIVITY = "site_activity";
     
     /**
      * From address
@@ -154,6 +156,11 @@ public class CustomMailAction extends ActionExecuterAbstractBase
      * The java mail sender
      */
     private JavaMailSender mailService;
+    
+    /**
+     * The Activity service
+     */
+    private ActivityService activityService;
     
     /**
      * The Template service
@@ -242,6 +249,14 @@ public class CustomMailAction extends ActionExecuterAbstractBase
     public void setMailService(JavaMailSender javaMailSender) 
     {
         this.mailService = javaMailSender;
+    }
+    
+    /**
+     * @param activityService   the ActivityService
+     */
+    public void setActivityService(ActivityService activityService)
+    {
+        this.activityService = activityService;
     }
     
     /**
@@ -623,6 +638,7 @@ public class CustomMailAction extends ActionExecuterAbstractBase
                 }
                           
                 // set recipient
+                // I don't think this is used - see getRecipients in parent
                 String to = (String)ruleAction.getParameterValue(PARAM_TO);
                 if (to != null && to.length() != 0)
                 {
@@ -755,12 +771,10 @@ public class CustomMailAction extends ActionExecuterAbstractBase
                                 for (String userAuth : users)
                                 {
                                     if (personService.personExists(userAuth) == true)
-                                    {
-                                        if (!personService.isEnabled(userAuth))
-                                        {
-                                            continue;
-                                        }
+                                    {   
                                         NodeRef person = personService.getPerson(userAuth);
+                                        
+                                     
                                         String address = (String)nodeService.getProperty(person, ContentModel.PROP_EMAIL);
                                         if (address != null && address.length() != 0)
                                         {
@@ -1035,15 +1049,10 @@ public class CustomMailAction extends ActionExecuterAbstractBase
 
 			private void setReplyTo(final Action ruleAction, final MimeMessageHelper[] messageRef, String from)
 					throws MessagingException {
+				//ResponseNode can be a Long as well as Text
 				Object responseNode =  ruleAction.getParameterValue(PARAM_RESPONSE_NODE);
                 
                 if (responseNode != null) {
-                	String responseText;
-                	if (responseNode instanceof Long) {
-                		responseText = responseNode.toString();
-                	} else {
-                		responseText = (String) responseNode;
-                	}
                 	//Assuming address is valid...
                 	String[] parts = from.split("@");
                 	messageRef[0].setReplyTo(parts[0] + "+" + responseNode + "@" + parts[1]);
@@ -1242,6 +1251,18 @@ public class CustomMailAction extends ActionExecuterAbstractBase
         }
     }
     
+	private boolean isControlledActivity(Action ruleAction, String authority) {
+		boolean ret = false;
+		String siteActivity = (String) ruleAction.getParameterValue(PARAM_SITE_ACTIVITY);
+		List<FeedControl> feedControls = activityService.getFeedControls(authority);
+		for (FeedControl fc: feedControls) {
+			if (fc.getSiteId().equals(siteActivity)) {
+				ret = true;
+			}
+		}
+		return ret;
+	}
+	
     @SuppressWarnings("unchecked")
     private Collection<Pair<String, Locale>> getRecipients(Action ruleAction) 
     {
@@ -1291,6 +1312,9 @@ public class CustomMailAction extends ActionExecuterAbstractBase
                         {
                             if (personExists(authority))
                             {
+                            	if (isControlledActivity(ruleAction, authority)) {
+                                	continue;
+                                }
                                 String address = getPersonEmail(authority);
                                 if (address != null && address.length() != 0 && validateAddress(address))
                                 {
@@ -1334,6 +1358,9 @@ public class CustomMailAction extends ActionExecuterAbstractBase
                             }
                             if (personExists(userAuth))
                             {
+                            	if (isControlledActivity(ruleAction, userAuth)) {
+                                	continue;
+                                }
                                 // Check the user name to be a valid email and we don't need to log an error in this case
                                 // ALF-19231
                                 // Validate the email, allowing for local email addresses
@@ -1605,6 +1632,7 @@ public class CustomMailAction extends ActionExecuterAbstractBase
         //Is text because it could be either a node-dbid or an alias
         paramList.add(new ParameterDefinitionImpl(PARAM_RESPONSE_NODE, DataTypeDefinition.TEXT, false, getParamDisplayLabel(PARAM_RESPONSE_NODE)));
         paramList.add(new ParameterDefinitionImpl(PARAM_LIST_ID, DataTypeDefinition.TEXT, false, getParamDisplayLabel(PARAM_LIST_ID)));
+        paramList.add(new ParameterDefinitionImpl(PARAM_SITE_ACTIVITY, DataTypeDefinition.TEXT, false, getParamDisplayLabel(PARAM_SITE_ACTIVITY)));
 
     }
 
