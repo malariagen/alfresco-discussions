@@ -7,7 +7,7 @@
    <#assign customName=profile.customProperties[prop].name?substring(profile.customProperties[prop].name?index_of("}") + 1)>
     <div class="yui-gd">
        <div class="yui-u first"><label
-       for="${el}-discussionsNotification">${customName}(${customValue}):</label></div>
+       for="${el}-discussionsNotification">${customName}:</label></div>
        <div class="yui-u"><input id="${el}-discussionsNotification" type="checkbox" <#if
        (customValue == "true")>checked="checked"</#if>
        name="discussionsNotification" tabindex="0" value="true" /></div>
