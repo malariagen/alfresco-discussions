@@ -4,7 +4,7 @@
     <groupId>net.malariagen.alfresco</groupId>
     <artifactId>discussions</artifactId>
     <version>1.0-SNAPSHOT</version>
-    <name>AIO - SDK 3.0 Beta</name>
+    <name>Discussions AIO</name>
     <description>All-In-One (AIO) project for Discussions Customization</description>
     <packaging>pom</packaging>
 
