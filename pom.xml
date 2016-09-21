@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>net.malariagen.alfresco</groupId>
     <artifactId>discussions</artifactId>
-    <version>0.0.1</version>
+    <version>1.0-SNAPSHOT</version>
     <name>Discussions AIO</name>
     <description>All-In-One (AIO) project for Discussions Customization</description>
     <packaging>pom</packaging>
@@ -362,7 +362,7 @@
         <connection>scm:git:git@github.com:malariagen/alfresco-discussions.git</connection>
         <url>scm:git:git@github.com:malariagen/alfresco-discussions.git</url>
         <developerConnection>scm:git:git@github.com:malariagen/alfresco-discussions.git</developerConnection>
-      <tag>0.0.1</tag>
+      <tag>HEAD</tag>
   </scm>
 
 </project>
