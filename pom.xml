@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>net.malariagen.alfresco</groupId>
     <artifactId>discussions</artifactId>
-    <version>0.0.2-SNAPSHOT</version>
+    <version>0.0.2</version>
     <name>Discussions AIO</name>
     <description>All-In-One (AIO) project for Discussions Customization</description>
     <packaging>pom</packaging>
@@ -333,7 +333,7 @@ mvn jgitflow:release-finish
 				  Prevents deployments from dev workstations so that they can be done by a CI
 				  server
 				-->
-				<noDeploy>false</noDeploy>
+				<noDeploy>true</noDeploy>
 				<flowInitContext>
 				  <!--
 					You can customize your development branch name. Why? Because it's faster to type
