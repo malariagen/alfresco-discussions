@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>net.malariagen.alfresco</groupId>
     <artifactId>discussions</artifactId>
-    <version>0.0.2-SNAPSHOT</version>
+    <version>0.0.2</version>
     <name>Discussions AIO</name>
     <description>All-In-One (AIO) project for Discussions Customization</description>
     <packaging>pom</packaging>
