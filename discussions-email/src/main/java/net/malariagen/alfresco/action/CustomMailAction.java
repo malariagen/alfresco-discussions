@@ -596,7 +596,6 @@ public class CustomMailAction extends ActionExecuterAbstractBase implements Init
 					mimeMessage.setHeader("List-Id", "<" + listHeaders + "." + sysAdminParams.getAlfrescoHost() + ">");
 					mimeMessage.setHeader("X-Auto-Response-Suppress", "All");
 					mimeMessage.setHeader("Precedence", "list");
-					mimeMessage.addHeader("Precedence", "bulk");
 					mimeMessage.setHeader("auto-submitted", "auto-generated");
 				}
 
