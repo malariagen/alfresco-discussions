@@ -333,7 +333,7 @@ mvn jgitflow:release-finish
 				  Prevents deployments from dev workstations so that they can be done by a CI
 				  server
 				-->
-				<noDeploy>false</noDeploy>
+				<noDeploy>true</noDeploy>
 				<flowInitContext>
 				  <!--
 					You can customize your development branch name. Why? Because it's faster to type
