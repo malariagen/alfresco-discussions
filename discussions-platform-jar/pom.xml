@@ -9,7 +9,7 @@
     <parent>
         <groupId>net.malariagen.alfresco</groupId>
         <artifactId>discussions</artifactId>
-        <version>0.0.2</version>
+        <version>0.0.3-SNAPSHOT</version>
     </parent>
 
     <properties>
