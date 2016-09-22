@@ -343,8 +343,6 @@ mvn jgitflow:release-finish
 					;-)
 				  -->
 				  <developBranchName>dvlp</developBranchName>
-				  <!-- You can also customize your tag prefixes -->
-				  <versionTagPrefix>rev-</versionTagPrefix>
 				</flowInitContext>
 			  </configuration>
 			</plugin> 
