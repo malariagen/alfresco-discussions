@@ -14,6 +14,8 @@ This is a fairly basic implementation of the script, for a more advanced discuss
 
 For an existing site you need to Edit Site Details and save it, then the option will appear the second time.
 
+Also see the wiki if you have any problems
+
 ## Installation
 
 discussions-email-version.jar and discussions-platform-jar-version.jar go into alfresco/WEB-INF/lib
