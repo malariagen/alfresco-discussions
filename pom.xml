@@ -10,7 +10,7 @@
 
     <properties>
         <!-- Alfresco Maven Plugin version to use -->
-        <alfresco.sdk.version>3.0.0-beta-3</alfresco.sdk.version>
+        <alfresco.sdk.version>3.0.0-beta-5</alfresco.sdk.version>
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
