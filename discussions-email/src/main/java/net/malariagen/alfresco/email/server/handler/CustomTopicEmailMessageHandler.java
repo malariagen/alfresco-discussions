@@ -1,6 +1,5 @@
 package net.malariagen.alfresco.email.server.handler;
 
-import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -79,7 +78,7 @@ public class CustomTopicEmailMessageHandler extends TopicEmailMessageHandler {
 	 *            Mail parser
 	 * @return Returns the new post node
 	 */
-	protected NodeRef addPostNode(NodeRef srcNodeRef, NodeRef nodeRef, EmailMessage message) {
+	protected NodeRef addPostNode(final NodeRef srcNodeRef, final NodeRef nodeRef, final EmailMessage message) {
 
 		NodeService nodeService = getNodeService();
 
@@ -120,6 +119,12 @@ public class CustomTopicEmailMessageHandler extends TopicEmailMessageHandler {
 
 		nodeService.addAspect(postNodeRef, ContentModel.ASPECT_SYNDICATION, properties);
 
+		properties.clear();
+
+        properties.put(ContentModel.PROP_TITLE, message.getSubject());
+        
+        nodeService.addAspect(nodeRef, ContentModel.ASPECT_TITLED, properties);
+        
 		// Write content
 
 		if (message.getBody() != null)
@@ -136,11 +141,10 @@ public class CustomTopicEmailMessageHandler extends TopicEmailMessageHandler {
 			for (EmailMessagePart attachment : attachments) {
 				String fileName = attachment.getFileName();
 
-				InputStream contentIs = attachment.getContent();
-
 				MimetypeService mimetypeService = getMimetypeService();
 				String mimetype = mimetypeService.guessMimetype(fileName);
-				String encoding = attachment.getEncoding();
+
+				//String encoding = attachment.getEncoding();
 				if (fileName.startsWith(message.getSubject() + " (part ")) {
 					if (mimetype.startsWith(MimetypeMap.MIMETYPE_HTML)) {
 						body = attachment;
@@ -220,6 +224,7 @@ public class CustomTopicEmailMessageHandler extends TopicEmailMessageHandler {
 					nodeService.addAspect(attachmentRef, MDGContentModel.ASPECT_ATTACHMENT, properties);
 					nodeService.createAssociation(attachmentRef, postNodeRef, MDGContentModel.ASSOC_ATTACHMENT);
 					 */
+					
 					addEmailedAspect(attachmentRef, message);
 
 					attachmentRefs.add(attachmentRef);
@@ -276,7 +281,7 @@ public class CustomTopicEmailMessageHandler extends TopicEmailMessageHandler {
 				content += "<ul>";
 				for (NodeRef attach : attachmentRefs) {
 					String url = "/share/page/site/" + siteInfo.getShortName()
-							+ "/document-details?nodeRef=workspace://SpacesStore/" + attach;
+							+ "/document-details?nodeRef=" + attach;
 					String name = DefaultTypeConverter.INSTANCE.convert(String.class,
 							nodeService.getProperty(attach, ContentModel.PROP_NAME));
 					content += "<li><a href=\"" + url + "\">" + name + "</a></li>";
