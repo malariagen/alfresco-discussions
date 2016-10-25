@@ -68,8 +68,14 @@
             <type>jar</type>
             <scope>test</scope>
        </dependency>
-		
-    </dependencies>
+
+       <dependency>
+       	<groupId>${project.groupId}</groupId>
+       	<artifactId>discussions-platform-jar</artifactId>
+       	<version>${project.version}</version>
+       	<scope>compile</scope>
+       </dependency>
+	</dependencies>
 
     <build>
         <plugins>

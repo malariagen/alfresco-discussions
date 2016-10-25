@@ -31,5 +31,13 @@
 		</property>
 	</bean>
 
+    <bean id="${project.artifactId}_forumPostBehaviours" class="net.malariagen.alfresco.behaviour.Post" init-method="init">
+        <property name="policyComponent">
+            <ref bean="policyComponent" />
+        </property>
+        <property name="nodeService" ref="NodeService"/>
+        <property name="contentService" ref="ContentService"/>
+    </bean>
+
 
 </beans>

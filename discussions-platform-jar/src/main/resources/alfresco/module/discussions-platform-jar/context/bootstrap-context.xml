@@ -1,37 +1,51 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <beans xmlns="http://www.springframework.org/schema/beans"
-       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-       xsi:schemaLocation="http://www.springframework.org/schema/beans
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
           http://www.springframework.org/schema/beans/spring-beans-2.0.xsd">
 
-    <!-- The bootstrap-context.xml file is used for patch definitions, importers, 
-		 workflow, and loading custom content models.  -->
+	<!-- The bootstrap-context.xml file is used for patch definitions, importers, 
+		workflow, and loading custom content models. -->
 
-        <bean id="discussions.bootstrap" class="org.alfresco.repo.module.ImporterModuleComponent"
-                parent="module.baseComponent">
+	<!-- Registration of new models -->
+	<bean id="org.cggh.dictionaryBootstrap" parent="dictionaryModelBootstrap"
+		depends-on="dictionaryBootstrap">
+		<property name="models">
+			<list>
+				<value>alfresco/module/${project.artifactId}/model/content-model.xml</value>
+			</list>
+		</property>
+	</bean>
 
-                <!-- Module Details -->
-                <property name="moduleId" value="${project.artifactId}" />
-                <property name="name" value="${project.artifactId}Bootstrap" />
-                <property name="description" value="My Modules initial data requirements" />
-                <property name="sinceVersion" value="0.0.0" />
-                <property name="appliesFromVersion" value="0.0.0" />
+	<bean id="discussions.bootstrap" class="org.alfresco.repo.module.ImporterModuleComponent"
+		parent="module.baseComponent">
 
-                <!-- Data properties -->
-                <property name="importer" ref="spacesBootstrap" />
-                <property name="bootstrapViews">
-                        <list>
-                                <props>
-                                        <prop key="path">/${spaces.company_home.childname}/${spaces.dictionary.childname}/${spaces.templates.email.childname}/${spaces.templates.email.notify.childname}</prop>
-                                        <prop key="location">alfresco/module/${project.artifactId}/bootstrap/config_email_templates.xml</prop>
-                                </props>
-                                <props>
-                                        <prop key="path">/${spaces.company_home.childname}/${spaces.dictionary.childname}/${spaces.scripts.childname}</prop>
-                                        <prop key="location">alfresco/module/${project.artifactId}/bootstrap/config_discussion_action.xml</prop>
-                                </props>
-                        </list>
-                </property>
+		<!-- Module Details -->
+		<property name="moduleId" value="${project.artifactId}" />
+		<property name="name" value="${project.artifactId}Bootstrap" />
+		<property name="description" value="My Modules initial data requirements" />
+		<property name="sinceVersion" value="0.0.0" />
+		<property name="appliesFromVersion" value="0.0.0" />
 
-        </bean>
+		<!-- Data properties -->
+		<property name="importer" ref="spacesBootstrap" />
+		<property name="bootstrapViews">
+			<list>
+				<props>
+					<prop key="path">/${spaces.company_home.childname}/${spaces.dictionary.childname}/${spaces.templates.email.childname}/${spaces.templates.email.notify.childname}
+					</prop>
+					<prop key="location">alfresco/module/${project.artifactId}/bootstrap/config_email_templates.xml
+					</prop>
+				</props>
+				<props>
+					<prop key="path">/${spaces.company_home.childname}/${spaces.dictionary.childname}/${spaces.scripts.childname}
+					</prop>
+					<prop key="location">alfresco/module/${project.artifactId}/bootstrap/config_discussion_action.xml
+					</prop>
+				</props>
+			</list>
+		</property>
+
+	</bean>
 
 </beans>
