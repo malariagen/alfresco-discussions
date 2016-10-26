@@ -1,14 +1,17 @@
 package net.malariagen.alfresco.email.server.handler;
 
+import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Map;
 
 import org.alfresco.email.server.handler.TopicEmailMessageHandler;
 import org.alfresco.error.AlfrescoRuntimeException;
 import org.alfresco.model.ApplicationModel;
 import org.alfresco.model.ContentModel;
 import org.alfresco.model.ForumModel;
+import org.alfresco.repo.admin.SysAdminParams;
 import org.alfresco.repo.content.MimetypeMap;
 import org.alfresco.service.cmr.email.EmailMessage;
 import org.alfresco.service.cmr.email.EmailMessagePart;
@@ -25,6 +28,7 @@ import org.alfresco.service.cmr.site.SiteService;
 import org.alfresco.service.namespace.NamespaceService;
 import org.alfresco.service.namespace.QName;
 import org.alfresco.util.PropertyMap;
+import org.alfresco.util.UrlUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -42,6 +46,11 @@ public class CustomTopicEmailMessageHandler extends TopicEmailMessageHandler {
 	private final static String ATTACHMENTS_FOLDER = "discussionAttachments";
 
 	protected SiteService siteService;
+	protected SysAdminParams sysAdminParams;
+	
+	public void setSysAdminParams(SysAdminParams sysAdminParams) {
+		this.sysAdminParams = sysAdminParams;
+	}
 
 	public void setSiteService(SiteService siteService) {
 		this.siteService = siteService;
@@ -280,8 +289,19 @@ public class CustomTopicEmailMessageHandler extends TopicEmailMessageHandler {
 			if (attachmentRefs.size() > 0) {
 				content += "<ul>";
 				for (NodeRef attach : attachmentRefs) {
+					
+					
+					final String siteName = siteInfo.getShortName();
+					final Map<QName, Serializable> contentProps = nodeService.getProperties(attach);
+					final String shareUrl = UrlUtil.getShareUrl(sysAdminParams);
+					String workSpace = (String) contentProps.get(ContentModel.PROP_STORE_PROTOCOL);
+					String spacesStore = (String) contentProps.get(ContentModel.PROP_STORE_IDENTIFIER);
+					String uiid = (String) contentProps.get(ContentModel.PROP_NODE_UUID);
+					String url = shareUrl + "/page/site/" + siteName + "/document-details?nodeRef=" + workSpace + "://" + spacesStore + "/" + uiid;
+					/*
 					String url = "/share/page/site/" + siteInfo.getShortName()
 							+ "/document-details?nodeRef=" + attach;
+							*/
 					String name = DefaultTypeConverter.INSTANCE.convert(String.class,
 							nodeService.getProperty(attach, ContentModel.PROP_NAME));
 					content += "<li><a href=\"" + url + "\">" + name + "</a></li>";
