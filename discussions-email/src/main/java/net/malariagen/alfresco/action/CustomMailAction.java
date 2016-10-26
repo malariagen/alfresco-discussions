@@ -1124,11 +1124,15 @@ public class CustomMailAction extends ActionExecuterAbstractBase implements Init
 		
 		String siteActivity = (String) ruleAction.getParameterValue(PARAM_SITE_ACTIVITY);
 		if (siteActivity != null) {
-			List<FeedControl> feedControls = AuthenticationUtil.runAsSystem(new RunAsWork<List<FeedControl>>() {
+			//See ALF-21752
+			String fau = AuthenticationUtil.getFullyAuthenticatedUser();
+			AuthenticationUtil.setFullyAuthenticatedUser(AuthenticationUtil.getSystemUserName());
+			List<FeedControl> feedControls = AuthenticationUtil.runAs(new RunAsWork<List<FeedControl>>() {
 				public List<FeedControl> doWork() throws Exception {
 					return activityService.getFeedControls(authority);
 				};
-			});
+			}, authority);
+			AuthenticationUtil.setFullyAuthenticatedUser(fau);
 			for (FeedControl fc : feedControls) {
 				if (fc.getSiteId().equals(siteActivity)) {
 					ret = true;

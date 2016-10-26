@@ -42,19 +42,5 @@
         </property>
     </bean>
 	
-	<!--  Import activityService bean from the ActivitiesFeed subsystem -->
-    <bean id="custom-activityService" class="org.alfresco.repo.management.subsystems.SubsystemProxyFactory">
-        <property name="sourceApplicationContextFactory">
-            <ref bean="ActivitiesFeed"/>
-        </property>
-        <property name="sourceBeanName">
-            <value>custom-activityService</value>
-        </property>
-        <property name="interfaces">
-            <list>
-                <value>org.alfresco.service.cmr.activities.ActivityService</value>
-            </list>
-        </property>
-    </bean>
 	
 </beans>
