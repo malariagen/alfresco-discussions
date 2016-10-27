@@ -66,6 +66,8 @@
 
         <!-- Environment to use, Alfresco Maven Plugin will copy alfresco-global.properties from this directory -->
         <env>local</env>
+
+        <module.log.level>warn</module.log.level>
     </properties>
 
     <dependencyManagement>
