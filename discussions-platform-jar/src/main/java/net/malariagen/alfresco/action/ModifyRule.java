@@ -5,9 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.alfresco.model.ContentModel;
 import org.alfresco.repo.action.ParameterDefinitionImpl;
-import org.alfresco.repo.action.evaluator.IsSubTypeEvaluator;
 import org.alfresco.repo.action.evaluator.NoConditionEvaluator;
 import org.alfresco.repo.action.executer.ActionExecuterAbstractBase;
 import org.alfresco.repo.action.executer.ScriptActionExecuter;

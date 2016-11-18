@@ -4,11 +4,11 @@
     <parent>
     <artifactId>discussions</artifactId>
     <groupId>net.malariagen.alfresco</groupId>
-    <version>0.0.2</version>
+    <version>0.0.3</version>
   </parent>
     <groupId>net.malariagen.alfresco</groupId>
     <artifactId>discussions-email</artifactId>
-    <version>0.0.2</version>
+    <version>0.0.3</version>
     <name>discussions-email Platform Jar Module</name>
     <description>Email customizations to support discussions enhancements</description>
     <packaging>jar</packaging>
@@ -68,8 +68,14 @@
             <type>jar</type>
             <scope>test</scope>
        </dependency>
-		
-    </dependencies>
+
+       <dependency>
+       	<groupId>${project.groupId}</groupId>
+       	<artifactId>discussions-platform-jar</artifactId>
+       	<version>${project.version}</version>
+       	<scope>compile</scope>
+       </dependency>
+	</dependencies>
 
     <build>
         <plugins>

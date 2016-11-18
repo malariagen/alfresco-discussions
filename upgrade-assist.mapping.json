@@ -1,0 +1,8 @@
+{
+    "beans": {
+                "custom-mail": {
+                    "context": "discussions-email/src/main/resources/alfresco/module/discussions-email/context/service-context.xml",
+                    "reference-bean-id": "mail"
+                }
+    }
+}

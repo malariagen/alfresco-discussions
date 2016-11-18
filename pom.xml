@@ -3,14 +3,14 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>net.malariagen.alfresco</groupId>
     <artifactId>discussions</artifactId>
-    <version>0.0.2</version>
+    <version>0.0.3</version>
     <name>Discussions AIO</name>
     <description>All-In-One (AIO) project for Discussions Customization</description>
     <packaging>pom</packaging>
 
     <properties>
         <!-- Alfresco Maven Plugin version to use -->
-        <alfresco.sdk.version>3.0.0-beta-3</alfresco.sdk.version>
+        <alfresco.sdk.version>3.0.0-beta-5</alfresco.sdk.version>
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
@@ -66,6 +66,8 @@
 
         <!-- Environment to use, Alfresco Maven Plugin will copy alfresco-global.properties from this directory -->
         <env>local</env>
+
+        <module.log.level>warn</module.log.level>
     </properties>
 
     <dependencyManagement>
