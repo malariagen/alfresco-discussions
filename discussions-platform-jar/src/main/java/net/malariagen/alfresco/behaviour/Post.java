@@ -137,6 +137,7 @@ public class Post implements OnCreateNodePolicy, OnContentUpdatePolicy {
 								}
 								AssociationRef newAssoc = null;
 								if (!nodeService.hasAspect(attachmentRef, MDGContentModel.ASPECT_ATTACHMENT)) {
+									properties.clear();
 									nodeService.addAspect(attachmentRef, MDGContentModel.ASPECT_ATTACHMENT, properties);
 									newAssoc = nodeService.createAssociation(attachmentRef, nodeRef,
 											MDGContentModel.ASSOC_ATTACHMENT);
