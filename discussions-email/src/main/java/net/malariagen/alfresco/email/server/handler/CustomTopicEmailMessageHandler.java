@@ -29,6 +29,7 @@ import org.alfresco.service.namespace.NamespaceService;
 import org.alfresco.service.namespace.QName;
 import org.alfresco.util.PropertyMap;
 import org.alfresco.util.UrlUtil;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -188,8 +189,8 @@ public class CustomTopicEmailMessageHandler extends TopicEmailMessageHandler {
 					// Make sure that the name is unique
 					while (nodeService.getChildByName(attachmentFolder, ContentModel.ASSOC_CONTAINS,
 							fileName) != null) {
-						i++;
-						fileName = attachmentName + i;
+						i++;						
+						fileName = FilenameUtils.getBaseName(attachmentName) + "(" + i + ")." + FilenameUtils.getExtension(fileName);
 					}
 					;
 
