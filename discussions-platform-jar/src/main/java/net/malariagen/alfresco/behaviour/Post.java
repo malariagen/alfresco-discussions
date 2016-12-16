@@ -97,10 +97,18 @@ public class Post implements OnCreateNodePolicy, OnContentUpdatePolicy {
 				logger.debug("Post behaviour");
 			}
 			boolean discussion = true;
+			NodeRef topicNodeRef = null;
 			List<ChildAssociationRef> parents = nodeService.getParentAssocs(nodeRef);
 			for (ChildAssociationRef parent : parents) {
 				NodeRef parentNodeRef = parent.getParentRef();
 				// Parent of post is always topic
+				if (nodeService.getType(parentNodeRef).equals(ForumModel.TYPE_TOPIC)) {
+					List<ChildAssociationRef> siblings = nodeService.getChildAssocs(parentNodeRef);
+					if (siblings.isEmpty()) {
+						return;
+					}
+					topicNodeRef = siblings.get(0).getChildRef();
+				}
 				List<ChildAssociationRef> grandParents = nodeService.getParentAssocs(parentNodeRef);
 				for (ChildAssociationRef grandParent : grandParents) {
 					// But only a comment has a grandParent of forum
@@ -137,8 +145,9 @@ public class Post implements OnCreateNodePolicy, OnContentUpdatePolicy {
 								}
 								AssociationRef newAssoc = null;
 								if (!nodeService.hasAspect(attachmentRef, MDGContentModel.ASPECT_ATTACHMENT)) {
+									properties.clear();
 									nodeService.addAspect(attachmentRef, MDGContentModel.ASPECT_ATTACHMENT, properties);
-									newAssoc = nodeService.createAssociation(attachmentRef, nodeRef,
+									newAssoc = nodeService.createAssociation(attachmentRef, topicNodeRef,
 											MDGContentModel.ASSOC_ATTACHMENT);
 									currentAttachments.add(newAssoc);
 								} else {
@@ -150,7 +159,7 @@ public class Post implements OnCreateNodePolicy, OnContentUpdatePolicy {
 										}
 									}
 									if (!found) {
-										newAssoc = nodeService.createAssociation(attachmentRef, nodeRef,
+										newAssoc = nodeService.createAssociation(attachmentRef, topicNodeRef,
 												MDGContentModel.ASSOC_ATTACHMENT);
 										currentAttachments.add(newAssoc);
 									}

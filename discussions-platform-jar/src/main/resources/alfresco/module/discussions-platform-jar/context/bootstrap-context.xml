@@ -8,7 +8,7 @@
 		workflow, and loading custom content models. -->
 
 	<!-- Registration of new models -->
-	<bean id="org.cggh.dictionaryBootstrap" parent="dictionaryModelBootstrap"
+	<bean id="${project.artifactId}.discussions.dictionaryBootstrap" parent="dictionaryModelBootstrap"
 		depends-on="dictionaryBootstrap">
 		<property name="models">
 			<list>
@@ -23,7 +23,7 @@
 		<!-- Module Details -->
 		<property name="moduleId" value="${project.artifactId}" />
 		<property name="name" value="${project.artifactId}Bootstrap" />
-		<property name="description" value="My Modules initial data requirements" />
+		<property name="description" value="MalariaGEN Discussion Modules initial data requirements" />
 		<property name="sinceVersion" value="0.0.0" />
 		<property name="appliesFromVersion" value="0.0.0" />
 
