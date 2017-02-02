@@ -26,13 +26,32 @@
 		</property>
 	</bean>
 	
-	<!-- Import mail action executor from the OutboundSMTP subsystem -->
+	<!-- Import custom mail action executor from the OutboundSMTP subsystem -->
     <bean id="custom-mail" class="org.alfresco.repo.management.subsystems.SubsystemProxyFactory">
         <property name="sourceApplicationContextFactory">
             <ref bean="OutboundSMTP" />
         </property>
         <property name="sourceBeanName">
         	<value>custom-mail</value>
+      	</property>
+        <property name="interfaces">
+            <list>
+                <value>org.alfresco.repo.action.executer.ActionExecuter</value>
+                <value>org.alfresco.repo.action.executer.TestModeable</value>
+            </list>
+        </property>
+    </bean>
+	
+	<!-- Import mail action executor from the OutboundSMTP subsystem 
+	It is necessary to redefine this so that the sourceBeanName is specified otherwise
+	the default mail action breaks - see #5, https://issues.alfresco.com/jira/browse/ALF-21838
+	-->
+    <bean id="mail" class="org.alfresco.repo.management.subsystems.SubsystemProxyFactory">
+        <property name="sourceApplicationContextFactory">
+            <ref bean="OutboundSMTP" />
+        </property>
+        <property name="sourceBeanName">
+        	<value>mail</value>
       	</property>
         <property name="interfaces">
             <list>
