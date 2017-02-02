@@ -4,11 +4,11 @@
     <parent>
     <artifactId>discussions</artifactId>
     <groupId>net.malariagen.alfresco</groupId>
-    <version>0.0.5</version>
+    <version>0.0.6-SNAPSHOT</version>
   </parent>
     <groupId>net.malariagen.alfresco</groupId>
     <artifactId>discussions-email</artifactId>
-    <version>0.0.5</version>
+    <version>0.0.6-SNAPSHOT</version>
     <name>discussions-email Platform Jar Module</name>
     <description>Email customizations to support discussions enhancements</description>
     <packaging>jar</packaging>
